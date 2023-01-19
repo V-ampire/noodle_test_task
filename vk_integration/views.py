@@ -1,7 +1,9 @@
+from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.http import JsonResponse
 from django.views import View
 
+from vk_integration.services import create_group
 from vk_integration.vk_api import VkAPI
 
 
@@ -11,6 +13,7 @@ class GroupView(View):
         """Get vk group info."""
         api = VkAPI(access_token=settings.VK_ACCESS_TOKEN)
         group = await api.get_group_info(group_id)
+        await sync_to_async(create_group)(group)
         return JsonResponse(dict(group))
 
 

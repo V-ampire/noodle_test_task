@@ -10,6 +10,7 @@ uvicorn = "*"
 aiohttp = "*"
 ipython = "*"
 pydantic = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
