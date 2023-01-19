@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+    django: &django
+        container_name: noodle_django
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                PROJECT_DIR: ${PROJECT_DIR}
+        env_file: .env
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./static:${PROJECT_DIR}/static
+            - ./media:${PROJECT_DIR}/media
+            - .:${PROJECT_DIR}
+        depends_on:
+            - postgres
+
+    postgres:
+        container_name: noodle_postgres
+        image: postgres:15.0-alpine
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/
+        env_file:
+            - .env
+
+volumes:
+    postgres_data:
