@@ -68,13 +68,31 @@ DATABASES = {
         'NAME': env.str('POSTGRES_DB'),
         'USER': env.str('POSTGRES_USER'),
         'PASSWORD': env.str('POSTGRES_PASSWORD'),
-        'HOST': env.str('POSTGRES_HOST', '127.0.0.1'),
+        'HOST': env.str('POSTGRES_HOST', 'postgres'),
         'PORT': env.str('POSTGRES_PORT', '5432'),
     }
 }
 
 
-# Password validation
+REDIS_HOST = env.str('REDIS_HOST', 'redis')
+REDIS_PORT = env.str('REDIS_PORT', '6379')
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://{0}:{1}/0".format(
+            REDIS_HOST,
+            REDIS_PORT,
+        ),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        "TIMEOUT": None
+    }
+}
+
+
+        # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
