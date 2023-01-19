@@ -23,7 +23,7 @@ class VkAPI:
             Authorization=f"Bearer {self.access_token}"
         )
 
-    async def get_group_info(self, group_id: int, fields: str = 'id,members_count,name', **opts):
+    async def get_group_info(self, group_id: int, fields: str = 'id,members_count,name', **opts) -> dict:
         """
         Get VK group info.
 
