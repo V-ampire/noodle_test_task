@@ -44,7 +44,8 @@ class VkGroupRedisProvider(BaseVkProvider):
     async def get_by_id(self, group_id: int) -> VkGroupSchema | None:
         return await self._get_from_redis(group_id)
 
-    async def add_in_cache(self, schema: VkGroupSchema):
+    @sync_to_async
+    def add_in_cache(self, schema: VkGroupSchema):
         conn = get_redis_connection('default')
         return conn.hset(self.cache_hash_key, schema.id, json.dumps(dict(schema), ensure_ascii=False))
 
