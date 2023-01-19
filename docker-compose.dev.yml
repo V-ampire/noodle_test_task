@@ -17,6 +17,7 @@ services:
             - .:${PROJECT_DIR}
         depends_on:
             - postgres
+            - redis
 
     postgres:
         container_name: noodle_postgres
@@ -29,6 +30,30 @@ services:
     redis:
         container_name: noodle_redis
         image: redis:alpine
+
+    celery: &celery
+        <<: *django
+        container_name: noodle_celery
+        entrypoint: [ "/bin/bash", "shell_scripts/celery_start.sh" ]
+        volumes:
+            - .:/app
+        ports: [ ]
+        depends_on:
+            - redis
+            - django
+            - postgres
+
+#    beat:
+#        <<: *celery
+#        container_name: noodle_beat
+#        entrypoint: [ "/bin/sh", "shell_scripts/beat_start.sh" ]
+
+    flower:
+        <<: *django
+        container_name: noodle_flower
+        ports:
+            - "5555:5555"
+        entrypoint: [ "/bin/bash", "shell_scripts/flower_start.sh" ]
 
 volumes:
     postgres_data:

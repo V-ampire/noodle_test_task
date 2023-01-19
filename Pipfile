@@ -12,8 +12,12 @@ ipython = "*"
 pydantic = "*"
 psycopg2-binary = "*"
 django-redis = "*"
+watchfiles = "*"
+celery = {extras = ["redis"], version = "*"}
+flower = "*"
 
 [dev-packages]
+locust = "*"
 
 [requires]
 python_version = "3.10"

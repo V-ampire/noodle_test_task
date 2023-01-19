@@ -7,7 +7,7 @@ up:
 down:
 	docker compose -f docker-compose.dev.yml down;
 
-make bash:
+make sh:
 	docker compose -f docker-compose.dev.yml exec django bash;
 
 make createsuperuser:
