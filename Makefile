@@ -12,3 +12,6 @@ make bash:
 
 make createsuperuser:
 	docker compose -f docker-compose.dev.yml exec django python manage.py createsuperuser;
+
+make django:
+	docker compose -f docker-compose.dev.yml exec django python manage.py shell;

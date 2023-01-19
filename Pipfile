@@ -11,6 +11,7 @@ aiohttp = "*"
 ipython = "*"
 pydantic = "*"
 psycopg2-binary = "*"
+django-redis = "*"
 
 [dev-packages]
 

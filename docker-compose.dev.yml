@@ -26,5 +26,9 @@ services:
         env_file:
             - .env
 
+    redis:
+        container_name: noodle_redis
+        image: redis:alpine
+
 volumes:
     postgres_data:
