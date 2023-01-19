@@ -12,8 +12,8 @@ class GroupView(View):
     async def get(self, request, group_id, **kwargs):
         """Get vk group info."""
         api = VkAPI(access_token=settings.VK_ACCESS_TOKEN)
-        group = await api.get_group_info(group_id)
-        await sync_to_async(create_group)(group)
+        group_schema = await api.get_group_info(group_id)
+        group = await create_group(group_schema)
         return JsonResponse(dict(group))
 
 
