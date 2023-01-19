@@ -43,10 +43,10 @@ services:
             - django
             - postgres
 
-#    beat:
-#        <<: *celery
-#        container_name: noodle_beat
-#        entrypoint: [ "/bin/sh", "shell_scripts/beat_start.sh" ]
+    beat:
+        <<: *celery
+        container_name: noodle_beat
+        entrypoint: [ "/bin/sh", "shell_scripts/beat_start.sh" ]
 
     flower:
         <<: *django

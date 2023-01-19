@@ -21,3 +21,12 @@ def on_celery_setup_logging(**kwargs):
 
 app.autodiscover_tasks()
 
+
+app.conf.beat_schedule = {
+    # Update groups daily at 00:00
+    'update-vk-groups-daily': {
+        'task': 'vk_integration.tasks.update_vk_groups_task',
+        'schedule': crontab(minute=0, hour=0),
+    },
+}
+
