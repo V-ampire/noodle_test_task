@@ -81,18 +81,18 @@ class VkGroupCompositeProvider(BaseVkProvider):
         self.api_provider = VkGroupAPIProvider()
 
     async def _get_from_redis(self, group_id: int):
-        logger.debug(f'Get group from redis {group_id=}')
+        logger.info(f'Get group from redis {group_id=}')
         return await self.redis_provider.get_by_id(group_id)
 
     async def _get_from_db(self, group_id: int):
-        logger.debug(f'Get group from database {group_id=}')
+        logger.info(f'Get group from database {group_id=}')
         group = await self.db_provider.get_by_id(group_id)
         if group:
             await self.redis_provider.add_in_cache(group)
             return group
 
     async def _get_from_api(self, group_id: int):
-        logger.debug(f'Get group from api {group_id=}')
+        logger.info(f'Get group from api {group_id=}')
         group = await self.api_provider.get_by_id(group_id)
         if group:
             await self.db_provider.create(group)
@@ -121,6 +121,6 @@ async def update_vk_groups() -> str:
 
     updated = await db_provider.bulk_update(groups_to_update)
     result_msg = f"Updated {updated} vk groups"
-    logger.debug(result_msg)
+    logger.info(result_msg)
     return result_msg
 
