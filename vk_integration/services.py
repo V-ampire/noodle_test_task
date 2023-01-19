@@ -1,4 +1,5 @@
 import json
+import logging
 from abc import ABC, abstractmethod
 
 from asgiref.sync import sync_to_async
@@ -9,6 +10,9 @@ from pydantic import BaseModel
 from vk_integration.models import VkGroup
 from vk_integration.shemas import VkGroupSchema
 from vk_integration.vk_api import VkAPI
+
+
+logger = logging.getLogger(__name__)
 
 
 class BaseVkProvider(ABC):
@@ -60,4 +64,37 @@ class VkGroupDbProvider(BaseVkProvider):
     async def create(self, schema: VkGroupSchema):
         return await self._create_group(schema)
 
+
+class VkGroupCompositeProvider(BaseVkProvider):
+
+    def __init__(self):
+        self.redis_provider = VkGroupRedisProvider()
+        self.db_provider = VkGroupDbProvider()
+        self.api_provider = VkGroupAPIProvider()
+
+    async def _get_from_redis(self, group_id: int):
+        logger.debug(f'Get group from redis {group_id=}')
+        return await self.redis_provider.get_by_id(group_id)
+
+    async def _get_from_db(self, group_id: int):
+        logger.debug(f'Get group from database {group_id=}')
+        group = await self.db_provider.get_by_id(group_id)
+        if group:
+            await self.redis_provider.add_in_cache(group)
+            return group
+
+    async def _get_from_api(self, group_id: int):
+        logger.debug(f'Get group from api {group_id=}')
+        group = await self.api_provider.get_by_id(group_id)
+        if group:
+            await self.db_provider.create(group)
+            await self.redis_provider.add_in_cache(group)
+            return group
+        logger.error(f'No group from VK for {group_id=}')
+
+    async def get_by_id(self, group_id: int) -> VkGroupSchema | None:
+        for provider in [self._get_from_redis, self._get_from_db, self._get_from_api]:
+            group = await provider(group_id)
+            if group:
+                return group
 
