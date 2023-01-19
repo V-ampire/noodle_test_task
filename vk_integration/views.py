@@ -24,6 +24,7 @@ class GroupView(View):
         group = await self.db_provider.get_by_id(group_id)
         if group:
             await self.redis_provider.add_in_cache(group)
+            return group
 
     async def _get_from_api(self, group_id: int):
         logger.debug(f'Get group from api {group_id=}')
