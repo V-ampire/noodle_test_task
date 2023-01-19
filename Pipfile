@@ -9,6 +9,7 @@ django-environ = "*"
 uvicorn = "*"
 aiohttp = "*"
 ipython = "*"
+pydantic = "*"
 
 [dev-packages]
 

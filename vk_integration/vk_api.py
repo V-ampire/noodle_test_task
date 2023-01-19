@@ -1,6 +1,8 @@
 import aiohttp
 from aiohttp import ClientSession
 
+from vk_integration.shemas import VkGrouSchema
+
 
 class VkAPI:
 
@@ -23,7 +25,7 @@ class VkAPI:
             Authorization=f"Bearer {self.access_token}"
         )
 
-    async def get_group_info(self, group_id: int, fields: str = 'id,members_count,name', **opts) -> dict:
+    async def get_group_info(self, group_id: int, fields: str = 'id,members_count,name', **opts) -> VkGrouSchema:
         """
         Get VK group info.
 
@@ -40,5 +42,7 @@ class VkAPI:
 
         async with self._get_session() as session:
             async with session.get(url, params=params, headers=self._get_auth_headers()) as resp:
-                return await resp.json()
+                resp_data =  await resp.json()
+
+        return VkGrouSchema.from_response(resp_data)
 

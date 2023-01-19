@@ -10,8 +10,8 @@ class GroupView(View):
     async def get(self, request, group_id, **kwargs):
         """Get vk group info."""
         api = VkAPI(access_token=settings.VK_ACCESS_TOKEN)
-        group_info = await api.get_group_info(group_id)
-        return JsonResponse(group_info)
+        group = await api.get_group_info(group_id)
+        return JsonResponse(dict(group))
 
 
 
