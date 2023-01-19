@@ -65,6 +65,13 @@ class VkGroupDbProvider(BaseVkProvider):
     async def create(self, schema: VkGroupSchema):
         return await self._create_group(schema)
 
+    @sync_to_async
+    def bulk_update(self, schemas: list[VkGroupSchema]) -> int:
+        return VkGroup.objects.bulk_update(
+            [VkGroup(**dict(schema)) for schema in schemas],
+            ['name', 'users_count']
+        )
+
 
 class VkGroupCompositeProvider(BaseVkProvider):
 
@@ -98,4 +105,22 @@ class VkGroupCompositeProvider(BaseVkProvider):
             group = await provider(group_id)
             if group:
                 return group
+
+
+async def update_vk_groups() -> str:
+    """Update groups data."""
+    api = VkAPI(settings.VK_ACCESS_TOKEN)
+    db_provider = VkGroupDbProvider()
+    groups_to_update = []
+    async for group in VkGroup.objects.all():
+        try:
+            group_info = await api.get_group_info(group.id)
+            groups_to_update.append(group_info)
+        except Exception as exc:
+            logger.error(f"Error when getting group info for {group}, {exc}")
+
+    updated = await db_provider.bulk_update(groups_to_update)
+    result_msg = f"Updated {updated} vk groups"
+    logger.debug(result_msg)
+    return result_msg
 

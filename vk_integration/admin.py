@@ -8,5 +8,6 @@ class VkGroupAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'name',
-        'users_count'
+        'users_count',
+        'updated_at'
     )
