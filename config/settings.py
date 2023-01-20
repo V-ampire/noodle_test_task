@@ -146,6 +146,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 VK_ACCESS_TOKEN = env.str('VK_ACCESS_TOKEN')
+VK_MAX_GROUP_UPDATE_SIZE = 500
+VK_GROUP_UPDATE_INTERVAL_SECONDS = 60 * 60 * 24  # Every 24 hours
 
 
 LOG_LEVEL = env.str('LOG_LEVEL', default='DEBUG')

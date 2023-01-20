@@ -1,9 +1,12 @@
 import json
 import logging
 from abc import ABC, abstractmethod
+from datetime import timedelta
 
 from asgiref.sync import sync_to_async
+from celery.canvas import Signature
 from django.conf import settings
+from django.utils import timezone
 from pydantic import BaseModel
 from redis.asyncio import Redis
 
@@ -55,7 +58,8 @@ class VkGroupDbProvider(BaseVkProvider):
 
     @sync_to_async(thread_sensitive=False)
     def _create_group(self, schema: VkGroupSchema):
-        return VkGroup.objects.create(**dict(schema))
+        created, group = VkGroup.objects.get_or_create(**dict(schema))
+        return group
 
     async def create(self, schema: VkGroupSchema):
         return await self._create_group(schema)
@@ -106,20 +110,41 @@ class VkGroupCompositeProvider(BaseVkProvider):
                 return group
 
 
-async def update_vk_groups() -> str:
+def update_vk_groups():
+    def _run_update_task(group_ids: list[int]):
+        task_result = Signature(
+            'vk_integration.tasks.update_vk_groups_batch_task',
+            args=(group_ids,)
+        ).apply_async()
+        logger.info(f'Run update batch of {group_ids} groups, task={str(task_result)}')
+
+    groups_to_update = []
+    total_group_update = 0
+    last_update_timestamp = timezone.now() - timedelta(seconds=settings.VK_GROUP_UPDATE_INTERVAL_SECONDS)
+    for group in VkGroup.objects.filter(updated_at__lte=last_update_timestamp):
+        groups_to_update.append(group.id)
+        total_group_update += 1
+        if len(groups_to_update) == settings.VK_MAX_GROUP_UPDATE_SIZE:
+            _run_update_task(groups_to_update)
+            groups_to_update = []
+
+    if len(groups_to_update) > 0:
+        _run_update_task(groups_to_update)
+
+    result_msg = f"Run update for {total_group_update} vk groups"
+    logger.info(result_msg)
+    return result_msg
+
+
+async def update_vk_groups_batch(group_ids: list[int]) -> str:
     """Update groups data."""
     api = VkAPI(settings.VK_ACCESS_TOKEN)
     db_provider = VkGroupDbProvider()
     groups_to_update = []
-    async for group in VkGroup.objects.all():
-        try:
-            group_info = await api.get_group_info(group.id)
-            groups_to_update.append(group_info)
-        except Exception as exc:
-            logger.error(f"Error when getting group info for {group}, {exc}")
+    groups_info = await api.get_group_batch_info(group_ids)
+    groups_to_update.extend(groups_info)
 
     updated = await db_provider.bulk_update(groups_to_update)
-    result_msg = f"Updated {updated} vk groups"
+    result_msg = f"Updated batch of {updated} vk groups"
     logger.info(result_msg)
     return result_msg
-
