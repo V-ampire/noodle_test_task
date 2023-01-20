@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 
 from asgiref.sync import sync_to_async
 from django.conf import settings
-from django_redis import get_redis_connection
 from pydantic import BaseModel
+from redis.asyncio import Redis
 
 from vk_integration.models import VkGroup
 from vk_integration.shemas import VkGroupSchema
@@ -34,20 +34,15 @@ class VkGroupRedisProvider(BaseVkProvider):
 
     cache_hash_key = 'vk_groups'
 
-    @sync_to_async(thread_sensitive=False)
-    def _get_from_redis(self, group_id: int) -> VkGroupSchema | None:
-        conn = get_redis_connection('default')
-        cached_schema = conn.hget(self.cache_hash_key, group_id)
-        if cached_schema:
-            return VkGroupSchema(**json.loads(cached_schema))
-
     async def get_by_id(self, group_id: int) -> VkGroupSchema | None:
-        return await self._get_from_redis(group_id)
+        async with Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0) as conn:
+            cached_schema = await conn.hget(self.cache_hash_key, group_id)
+            if cached_schema:
+                return VkGroupSchema(**json.loads(cached_schema))
 
-    @sync_to_async(thread_sensitive=False)
-    def add_in_cache(self, schema: VkGroupSchema):
-        conn = get_redis_connection('default')
-        return conn.hset(self.cache_hash_key, schema.id, json.dumps(dict(schema), ensure_ascii=False))
+    async def add_in_cache(self, schema: VkGroupSchema):
+        async with Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0) as conn:
+            return await conn.hset(self.cache_hash_key, schema.id, json.dumps(dict(schema), ensure_ascii=False))
 
 
 class VkGroupDbProvider(BaseVkProvider):

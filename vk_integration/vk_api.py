@@ -3,7 +3,19 @@ import aiohttp
 from vk_integration.shemas import VkGroupSchema
 
 
-class VkAPI:
+fixes class SingletonAPI(type):
+
+    _api_instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._api_instances:
+            print(f'New API {cls}')
+            cls._api_instances[cls] = super(SingletonAPI, cls).__call__(*args, **kwargs)
+        print(f'API {cls} exists')
+        return cls._api_instances[cls]
+
+
+class VkAPI(metaclass=SingletonAPI):
 
     api_version = 5.131
     api_base_url = 'https://api.vk.com/method'
