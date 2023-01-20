@@ -1,5 +1,9 @@
+import os
 from pathlib import Path
 import environ
+
+
+os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -173,6 +177,3 @@ LOGGING = {
         },
     }
 }
-
-
-DJANGO_ALLOW_ASYNC_UNSAFE = True

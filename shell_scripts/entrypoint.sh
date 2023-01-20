@@ -6,6 +6,6 @@ echo 'Run django entrypoint'
 
 python manage.py migrate
 python manage.py collectstatic --noinput
-uvicorn config.asgi:application --reload --host 0.0.0.0 --workers 4
+uvicorn config.asgi:application --host 0.0.0.0 --workers 4 --limit-concurrency 500
 
 exec "$@"
