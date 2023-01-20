@@ -3,7 +3,7 @@ import aiohttp
 from vk_integration.shemas import VkGroupSchema
 
 
-fixes class SingletonAPI(type):
+class SingletonAPI(type):
 
     _api_instances = {}
 
