@@ -8,6 +8,22 @@
 
 
 ## Запуск сервиса
+
+### Установить переменные окружения в файле `.env`:
+```
+PROJECT_DIR=/app
+DEBUG=
+VK_ACCESS_TOKEN=
+DATABASE=postgres
+POSTGRES_DB=
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+LOG_LEVEL=ERROR
+```
+
+### Выполнить:
 ```
 $ make build
 $ make up

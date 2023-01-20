@@ -34,7 +34,7 @@ class VkGroupRedisProvider(BaseVkProvider):
 
     cache_hash_key = 'vk_groups'
 
-    @sync_to_async
+    @sync_to_async(thread_sensitive=False)
     def _get_from_redis(self, group_id: int) -> VkGroupSchema | None:
         conn = get_redis_connection('default')
         cached_schema = conn.hget(self.cache_hash_key, group_id)
@@ -44,7 +44,7 @@ class VkGroupRedisProvider(BaseVkProvider):
     async def get_by_id(self, group_id: int) -> VkGroupSchema | None:
         return await self._get_from_redis(group_id)
 
-    @sync_to_async
+    @sync_to_async(thread_sensitive=False)
     def add_in_cache(self, schema: VkGroupSchema):
         conn = get_redis_connection('default')
         return conn.hset(self.cache_hash_key, schema.id, json.dumps(dict(schema), ensure_ascii=False))
@@ -58,14 +58,14 @@ class VkGroupDbProvider(BaseVkProvider):
         if group:
             return VkGroupSchema(id=group.id, name=group.name, users_count=group.users_count)
 
-    @sync_to_async
+    @sync_to_async(thread_sensitive=False)
     def _create_group(self, schema: VkGroupSchema):
         return VkGroup.objects.create(**dict(schema))
 
     async def create(self, schema: VkGroupSchema):
         return await self._create_group(schema)
 
-    @sync_to_async
+    @sync_to_async(thread_sensitive=False)
     def bulk_update(self, schemas: list[VkGroupSchema]) -> int:
         return VkGroup.objects.bulk_update(
             [VkGroup(**dict(schema)) for schema in schemas],
