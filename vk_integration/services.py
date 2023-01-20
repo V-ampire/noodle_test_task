@@ -111,6 +111,11 @@ class VkGroupCompositeProvider(BaseVkProvider):
 
 
 def update_vk_groups():
+    """
+    Run update process.
+
+    Split vk groups on batches and run update task for each batch.
+    """
     def _run_update_task(group_ids: list[int]):
         task_result = Signature(
             'vk_integration.tasks.update_vk_groups_batch_task',
