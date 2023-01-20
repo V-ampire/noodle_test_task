@@ -33,3 +33,6 @@ $ locust
 ## Регулярное обновление
 Информация о сохраненных группах обновляется раз в сутки (реализовано с помощью `Celery Beat`)
 
+
+![image](https://github.com/V-ampire/noodle_test_task/blob/master/test.png)
+
