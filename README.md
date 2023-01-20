@@ -34,5 +34,7 @@ $ locust
 Информация о сохраненных группах обновляется раз в сутки (реализовано с помощью `Celery Beat`)
 
 
+## Результаты тестов
+
 ![image](https://github.com/V-ampire/noodle_test_task/blob/master/test.png)
 
