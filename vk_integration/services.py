@@ -74,6 +74,7 @@ class VkGroupDbProvider(BaseVkProvider):
 
 
 class VkGroupCompositeProvider(BaseVkProvider):
+    """Composite providers to build get group flow."""
 
     def __init__(self):
         self.redis_provider = VkGroupRedisProvider()
@@ -85,6 +86,7 @@ class VkGroupCompositeProvider(BaseVkProvider):
         return await self.redis_provider.get_by_id(group_id)
 
     async def _get_from_db(self, group_id: int):
+        """Get group from database and cache in Redis"""
         logger.info(f'Get group from database {group_id=}')
         group = await self.db_provider.get_by_id(group_id)
         if group:
@@ -92,6 +94,7 @@ class VkGroupCompositeProvider(BaseVkProvider):
             return group
 
     async def _get_from_api(self, group_id: int):
+        """Get group from API, save in database and cache in Redis"""
         logger.info(f'Get group from api {group_id=}')
         group = await self.api_provider.get_by_id(group_id)
         if group:
@@ -101,6 +104,7 @@ class VkGroupCompositeProvider(BaseVkProvider):
         logger.error(f'No group from VK for {group_id=}')
 
     async def get_by_id(self, group_id: int) -> VkGroupSchema | None:
+        """Try to get group from provider, if no group use next provider."""
         for provider in [self._get_from_redis, self._get_from_db, self._get_from_api]:
             group = await provider(group_id)
             if group:
